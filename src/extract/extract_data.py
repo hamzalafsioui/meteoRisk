@@ -3,6 +3,7 @@ import os
 import requests
 import pandas as pd
 from datetime import datetime,timezone
+import time
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -63,9 +64,14 @@ def extract_weather():
                     "extracted_at": now_str
                 })
             print(f"{city} extracted ({len(times)} hours)")
+            time.sleep(0.1) 
 
         except Exception as e:
             print(f"Failed for {city}: {e}")
+            time.sleep(0.5)
+            
+        time.sleep(0.2)
+
 
     # Save to Bronze CSV
     os.makedirs(os.path.dirname(BRONZE_CSV), exist_ok=True)
