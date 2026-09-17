@@ -1,0 +1,87 @@
+import streamlit as st
+import pandas as pd
+from sqlalchemy import create_engine
+
+
+st.set_page_config(
+    page_title="MeteoRisk Morocco",
+    layout="wide"
+)
+
+
+DB_URL = "postgresql+psycopg2://airflow:airflow@postgres:5432/meteorisk"
+
+@st.cache_data
+def load_data():
+    engine = create_engine(DB_URL)
+    query = """
+        SELECT 
+            c.city_name,
+            c.latitude,
+            c.longitude,
+            f.forecast_date,
+            f.max_temp_c,
+            f.total_rain_mm,
+            f.max_wind_kmh,
+            f.min_visibility_km,
+            f.risk_score,
+            f.risk_level,
+            f.hazard,
+            f.recommendation
+        FROM fact_logistics_risk f
+        JOIN dim_cities c ON f.city_id = c.city_id;
+    """
+    data = pd.read_sql(query, engine)
+    data["forecast_date"] = pd.to_datetime(data["forecast_date"]).dt.date
+    return data
+
+df = load_data()
+
+
+# ============= Filters ============
+st.sidebar.header("Filtres")
+
+# Filtre by date
+available_dates = sorted(df["forecast_date"].unique())
+selected_date = st.sidebar.selectbox("Dates",available_dates)
+
+# Filter by level risk
+all_levels = ["LOW","MODERATE","HIGH","CRITICAL"]
+selected_levels = st.sidebar.multiselect("risk level",all_levels,default = all_levels)
+
+# Filter by Cities
+all_cities = ["All Cities"] + sorted(df["city_name"].unique().tolist())
+selected_city = st.sidebar.selectbox("City",all_cities)
+
+# apply filter
+filtered_df = df[
+    (df["forecast_date"]==selected_date) &
+    (df["risk_level"].isin(selected_levels))
+]
+if selected_city != "All Cities":
+    filtered_df = filtered_df[filtered_df["city_name"]==selected_city]
+
+
+st.title("MeteoRisk Morocco")
+st.write(f"Date: {selected_date}")
+
+col1,col2,col3,col4 = st.columns(4)
+
+# Number of cities
+with col1:
+    st.metric("Number of cities",len(filtered_df["city_name"].unique()))
+
+# Max_Temp_C
+with col2:
+    max_temp = filtered_df["max_temp_c"].max() if not filtered_df.empty else 0
+    st.metric("Max_Temp_C",f"{max_temp:.1f} C")
+
+# Raining Max
+with col3:
+    max_rain = filtered_df["total_rain_mm"].max() if not filtered_df.empty else 0
+    st.metric("Raining Max",f"{max_rain:.1f} mm")
+
+# High Risk Cities
+with col4:
+    alert_count = len(filtered_df[filtered_df["risk_level"].isin(["HIGH","CRITICAL"])])
+    st.metric("High Risk Cities",alert_count)
