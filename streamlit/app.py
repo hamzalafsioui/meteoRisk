@@ -112,7 +112,7 @@ with col_q1:
 
     # Max axis 
     max_temp = top_temps["max_temp_c"].max()
-    axis_max = math.ceil(max_temp/5)* 5
+    axis_max = (math.ceil(max_temp/5)* 5) if pd.notnull(max_temp) and max_temp > 0 else 40
 
 
     fig_q1.update_layout(yaxis= dict(range=[0,axis_max],dtick = 5), height=350)
@@ -132,8 +132,14 @@ with col2_q2:
         labels ={"total_rain_mm":"Precipitations (mm)","city_name":"City"}
     )
 
+    max_rain = top_rain["total_rain_mm"].max()
+    axis_max = (math.ceil(max_rain) + 2) if max_rain > 0 else 5
 
-    fig_q2.update_layout(yaxis = {"categoryorder":"total ascending"},height = 350)
+
+    fig_q2.update_layout(
+        xaxis = dict(range = [0,axis_max]),
+        yaxis = {"categoryorder":"total ascending"},
+        height = 350)
     st.plotly_chart(fig_q2,use_container_width = True)
 
 # Cities with the highest average risk
