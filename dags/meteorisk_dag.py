@@ -26,7 +26,7 @@ default_args = {
 
 
 with DAG (
-    dag_id = "metroerisk_etl_pipeline",
+    dag_id = "meteorisk_etl_pipeline",
     default_args=default_args,
     description= "Morocco Logistics Weather Pipeline (Bronze -> Silver -> Gold -> PostgreSQL)",
     schedule_interval = "@daily",
