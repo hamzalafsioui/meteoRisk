@@ -89,7 +89,7 @@ with col4:
     st.metric("High Risk Cities",alert_count)
 
 
-# cities with the highest Temperateures
+# cities with the highest Temperateures & the highest rainfall
 col_q1,col2_q2 = st.columns(2)
 
 with col_q1:
@@ -111,5 +111,26 @@ with col_q1:
     fig_q1.update_layout(yaxis= dict(range=[0,axis_max],dtick = 5), height=350)
     
     st.plotly_chart(fig_q1, use_container_width=True)
+
+# the highest rainfall
+
+with col2_q2:
+    st.write("Cities with the highest Rainfall")
+    top_rain = filtered_df.sort_values("total_rain_mm",ascending=False).head(10)
+    fig_q2 = px.bar(
+        top_rain,
+        x = "total_rain_mm",
+        y = "city_name",
+        orientation = "h",
+        labels ={"total_rain_mm":"Precipitations (mm)","city_name":"City"}
+    )
+
+
+    fig_q1.update_layout(yaxis = {"categoryorder":"total ascending"},height = 350)
+    st.plotly_chart(fig_q2,use_container_width = True)
+
+
+
+
     
     
