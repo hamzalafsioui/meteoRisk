@@ -39,6 +39,13 @@ def load_data():
 
 df = load_data()
 
+RISK_COLORS = {
+    "LOW": "#28a745",
+    "MODERATE": "#ffc107",
+    "HIGH": "#fd7e14",
+    "CRITICAL": "#dc3545"
+}
+
 
 # ============= Filters ============
 st.sidebar.header("Filtres")
@@ -164,3 +171,36 @@ with col4_q4:
     st.plotly_chart(fig_q4,use_container_width = True)
     
 
+# Maximun Risk period by city 
+
+st.write(" Maximun Risk period by city ")
+st.caption("The date shown on each bar indicates the day when the risk is highest")
+
+worst_idx = df.groupby("city_name")["risk_score"].idxmax()
+worst_per_city = df.loc[worst_idx].sort_values(by="risk_score",ascending=False).head(20).copy()
+
+worst_per_city["critical_date"] = worst_per_city["forecast_date"].astype(str)
+
+fig_q5 = px.bar(
+    worst_per_city,
+    x = "risk_score",
+    y = "city_name",
+    orientation = "h",
+    color = "risk_level",
+    color_discrete_map = RISK_COLORS,
+    text = "critical_date",
+    hover_data = {"risk_score":True,"critical_date":True,"hazard":True,"recommendation":True,"max_wind_kmh": True,
+        "total_rain_mm": True,
+        "max_temp_c": True
+        },labels={
+        "risk_score": "High Risk Score (0-100)",
+        "city_name": "City",
+        "risk_level": "Level",
+        "date_critique": "Critical date"
+    }
+)
+fig_q5.update_layout(
+    yaxis = {"categoryorder":"total ascending"},height = 480
+)
+fig_q5.update_traces(textposition = "inside")
+st.plotly_chart(fig_q5,use_container_width = True)
