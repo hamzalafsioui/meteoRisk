@@ -149,5 +149,18 @@ with col3_q3:
 
 
 
+# Periods presenting high risk
+with col4_q4:
+    st.write("Periods presenting the highest risk (National)")
+    daily_risk = df.groupby("forecast_date")["risk_score"].mean().reset_index()
+    fig_q4 = px.line(
+        daily_risk,
+        x = "forecast_date",
+        y = "risk_score",
+        markers = True,
+        labels = {"forecast_date":"Date","risk_score":"Risk Moyen National (Global)"}
+    )
+    fig_q4.update_layout(height = 350)
+    st.plotly_chart(fig_q4,use_container_width = True)
     
-    
+
