@@ -126,9 +126,26 @@ with col2_q2:
     )
 
 
-    fig_q1.update_layout(yaxis = {"categoryorder":"total ascending"},height = 350)
+    fig_q2.update_layout(yaxis = {"categoryorder":"total ascending"},height = 350)
     st.plotly_chart(fig_q2,use_container_width = True)
 
+# Cities with the highest average risk
+col3_q3,col4_q4 = st.columns(2)
+
+with col3_q3:
+    st.write("Cities with the highest average risk (7 days)")
+    avg_risk = df.groupby("city_name")["risk_score"].mean().reset_index()
+    top_risk = avg_risk.sort_values(by="risk_score",ascending=False).head(10)
+
+    fig_q3 = px.bar(
+        top_risk,
+        x = "risk_score",
+        y = "city_name",
+        orientation = "h",
+        labels ={"risk_score":"score moyen (0-100)","city_name":"City"}
+    )
+    fig_q3.update_layout(yaxis = {"categoryorder":"total ascending"},height = 350)
+    st.plotly_chart(fig_q3,use_container_width = True)
 
 
 
