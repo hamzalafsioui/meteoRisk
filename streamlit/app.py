@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+import math
 from sqlalchemy import create_engine
 
 
@@ -85,3 +87,29 @@ with col3:
 with col4:
     alert_count = len(filtered_df[filtered_df["risk_level"].isin(["HIGH","CRITICAL"])])
     st.metric("High Risk Cities",alert_count)
+
+
+# cities with the highest Temperateures
+col_q1,col2_q2 = st.columns(2)
+
+with col_q1:
+    st.write('cities with the highest Temperateures')
+    top_temps = filtered_df.sort_values(by="max_temp_c",ascending=False).head(10)
+    
+    fig_q1 = px.bar(
+        top_temps,
+        x="city_name",
+        y="max_temp_c",
+        labels={"max_temp_c": "Temperature max (C)", "city_name": "City"}
+    )
+
+    # Max axis 
+    max_temp = top_temps["max_temp_c"].max()
+    axis_max = math.ceil(max_temp/5)* 5
+
+
+    fig_q1.update_layout(yaxis= dict(range=[0,axis_max],dtick = 5), height=350)
+    
+    st.plotly_chart(fig_q1, use_container_width=True)
+    
+    
